@@ -1272,8 +1272,11 @@
                             fatUst.TIPI = TFaturaTipi.ft_Acik;
                             fatUst.Proje_Kodu = "00";
                             fatUst.KDV_DAHILMI = false;
-                            fatUst.GEN_ISK1T = (double)invoice.AllowanceCharge[0].Amount.Value;
-                            fatUst.GEN_ISK1O = (double)invoice.AllowanceCharge[0].MultiplierFactorNumeric.Value * 100;
+                            if (invoice.AllowanceCharge.Any())
+                            {
+                                fatUst.GEN_ISK1T = (double)invoice.AllowanceCharge[0].Amount.Value;
+                                fatUst.GEN_ISK1O = (double)invoice.AllowanceCharge[0].MultiplierFactorNumeric.Value * 100;
+                            }
 
 
                             //fatUst.BRUTTUTAR = 2;
