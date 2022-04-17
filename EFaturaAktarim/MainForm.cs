@@ -1045,6 +1045,7 @@
                     if (files != null && files.Length > 0)
                     {
                         writer = new System.IO.StreamWriter($"{txtSelectedFolder.Text}\\aktarim.log", false, System.Text.Encoding.GetEncoding("windows-1254"));
+                        writer.AutoFlush = true;
                         foreach (var f in files)
                         {
                             //ICSharpCode.SharpZipLib.Zip.FastZip shpZip = new ICSharpCode.SharpZipLib.Zip.FastZip();
@@ -1250,7 +1251,7 @@
                         try
                         {
                             sirket = kernel.yeniSirket(TVTTipi.vtMSSQL,
-                                                          "MAHIR2021",
+                                                          this.txtFolderSchema.Text,
                                                           "TEMELSET",
                                                           "",
                                                           "netopenx",
@@ -1270,9 +1271,9 @@
                             fatUst.ODEMETARIHI = invoice.IssueDate.Value;
                             fatUst.ODEMEGUNU = 0;
                             fatUst.TIPI = TFaturaTipi.ft_Acik;
-                            fatUst.Proje_Kodu = "00";
+                            fatUst.Proje_Kodu = "G";
                             fatUst.KDV_DAHILMI = false;
-                            if (invoice.AllowanceCharge.Any())
+                            if (invoice.AllowanceCharge != null && invoice.AllowanceCharge.Length > 0)
                             {
                                 fatUst.GEN_ISK1T = (double)invoice.AllowanceCharge[0].Amount.Value;
                                 fatUst.GEN_ISK1O = (double)invoice.AllowanceCharge[0].MultiplierFactorNumeric.Value * 100;
@@ -1291,14 +1292,16 @@
                                 fatKalem.STra_BF = (double)invoice.InvoiceLine[i].Price.PriceAmount.Value;
                                 fatKalem.STra_SIPNUM = invoice.OrderReference.ID.Value;
                                 //fatKalem.Irsaliyetar = invoice.OrderReference.IssueDate.Value;
-                                if (invoice.InvoiceLine[0].AllowanceCharge.Any())
+                                if (invoice.InvoiceLine[0].AllowanceCharge != null && invoice.InvoiceLine[0].AllowanceCharge.Length > 0)
                                     fatKalem.STra_SatIsk = (double)invoice.InvoiceLine[0].AllowanceCharge[0].MultiplierFactorNumeric.Value * 100;
 
 
                                 //fatKalem.Stra_IrsKont = invoice.InvoiceLine[i].OrderLineReference[0].LineI;
-                                fatKalem.STra_KDV = (double)invoice.InvoiceLine[i].TaxTotal.TaxSubtotal[0].Percent.Value;
+                                if (invoice.InvoiceLine[i].TaxTotal.TaxSubtotal != null && invoice.InvoiceLine[i].TaxTotal.TaxSubtotal.Length > 0)
+                                    fatKalem.STra_KDV = (double)invoice.InvoiceLine[i].TaxTotal.TaxSubtotal[0].Percent.Value;
                                 //fatKalem.SatisKDVOran = invoice.TaxTotal.TaxSubtotal.Percent;
-                                if (invoice.TaxTotal[0].TaxSubtotal[0].TaxableAmount.currencyID == "USD")
+                                if (invoice.TaxTotal != null && invoice.TaxTotal.Length > 0 && invoice.TaxTotal[0].TaxSubtotal != null && 
+                                    invoice.TaxTotal[0].TaxSubtotal.Length > 0 && invoice.TaxTotal[0].TaxSubtotal[0].TaxableAmount.currencyID == "USD")
                                 {
                                     fatKalem.STra_DOVTIP = 1;
                                     fatKalem.STra_DOVFIAT = (double)invoice.TaxTotal[0].TaxSubtotal[0].TaxableAmount.Value;
@@ -1317,8 +1320,8 @@
                         }
                         catch (Exception exc1)
                         {
-                            logwriter.WriteLine($"{xmlfile} hata {exc1.Message}");
-                            MessageBox.Show(string.Format("Xml dosyasi acilirken hata:{0}{1}", Environment.NewLine, exc1), "Hata", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                            logwriter.WriteLine($"{xmlfile} hata {exc1.Message} detay {exc1.StackTrace}");
+                            //MessageBox.Show(string.Format("Xml dosyasi acilirken hata:{0}{1}", Environment.NewLine, exc1), "Hata", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                         }
                         finally
                         {
@@ -1475,7 +1478,8 @@
             }
             catch (Exception exc)
             {
-                MessageBox.Show(string.Format("Xml dosyasi acilirken hata:{0}{1}", Environment.NewLine, exc), "Hata", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                logwriter.WriteLine($"{xmlfile} hata {exc.Message} detay {exc.StackTrace}");
+                //MessageBox.Show(string.Format("Xml dosyasi acilirken hata:{0}{1}", Environment.NewLine, exc), "Hata", MessageBoxButtons.OK, MessageBoxIcon.Hand);
             }
             finally
             {

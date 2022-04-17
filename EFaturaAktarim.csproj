@@ -42,8 +42,6 @@
   <ItemGroup>
     <Compile Include="EARSIVFATURA\Class1.cs" />
     <Compile Include="Envelop\Class1.cs" />
-    <Compile Include="TEMELFATURA\TEMELFATURA.cs" />
-    <Compile Include="TICARIFATURA\Class1.cs" />
     <Compile Include="XFatura.cs" />
     <EmbeddedResource Include="EFaturaAktarim\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
