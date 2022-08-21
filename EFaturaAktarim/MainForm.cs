@@ -12,10 +12,13 @@
     using NetOpenX.Rest.Client.Model.NetOpenX;
     using NetOpenX50;
     using Netsis.EFatura.DataObjects.Repository;
+    using Netsis.EFatura.MainDoc;
+    using Netsis.EFatura.Utility;
     using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Configuration;
     using System.Data;
     using System.Data.Common;
     using System.Diagnostics;
@@ -24,6 +27,7 @@
     using System.Linq;
     using System.Runtime.InteropServices;
     using System.Text;
+    using System.Threading;
     using System.Windows.Forms;
     using System.Xml;
     using System.Xml.Serialization;
@@ -84,6 +88,15 @@
         private Label label23;
         private TextBox textUrl;
         private Button btnaktar;
+        private Button btnsil;
+        private TabPage tabPage3;
+        private PropertyGrid propertyGrid1;
+        private Label label24;
+        private TextBox textFatura;
+        private Button btnbul;
+        private Label label25;
+        private TextBox textCari;
+        private Button btnaktar2;
         private TextBox txtSourceUser;
 
         [DllImport("kernel32")]
@@ -241,10 +254,13 @@
                 try
                 {
                     files = Directory.GetFiles(this.txtSelectedFolder.Text, "*.zip");
-                    if (files.Length == 0)
-                    {
-                        return;
-                    }
+                    if (files.Length == 0) return;
+
+                    foreach (var s in files) CheckDirForZip(s);
+
+                    files = Directory.GetFiles(this.txtSelectedFolder.Text, "*.zip");
+                    if (files.Length == 0) return;
+
                 }
                 catch (Exception exception1)
                 {
@@ -301,6 +317,8 @@
                             type2.fileName = Path.GetFileName(str3);
                             type2.hash = str4;
                             documentType documentRequest = type2;
+
+
                             string str5 = EnvelopeHelper.Instance.ProcessDocumentWithoutResponse(documentRequest, (short)Convert.ToInt32(this.txtFolderBranch.Text), "", DateTime.MinValue, StateCodeType.stEnvelopeHandledSuccessfully, this.rdIn.Checked ? ((byte)2) : ((byte)1));
                             if (string.IsNullOrEmpty(str5))
                             {
@@ -383,6 +401,11 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.btnaktar2 = new System.Windows.Forms.Button();
+            this.btnsil = new System.Windows.Forms.Button();
+            this.btnaktar = new System.Windows.Forms.Button();
+            this.label23 = new System.Windows.Forms.Label();
+            this.textUrl = new System.Windows.Forms.TextBox();
             this.checkFatura = new System.Windows.Forms.CheckBox();
             this.rdOut = new System.Windows.Forms.RadioButton();
             this.label22 = new System.Windows.Forms.Label();
@@ -404,19 +427,25 @@
             this.label19 = new System.Windows.Forms.Label();
             this.txtFolderServer = new System.Windows.Forms.TextBox();
             this.label20 = new System.Windows.Forms.Label();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.label25 = new System.Windows.Forms.Label();
+            this.textCari = new System.Windows.Forms.TextBox();
+            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
+            this.label24 = new System.Windows.Forms.Label();
+            this.textFatura = new System.Windows.Forms.TextBox();
+            this.btnbul = new System.Windows.Forms.Button();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
-            this.textUrl = new System.Windows.Forms.TextBox();
-            this.label23 = new System.Windows.Forms.Label();
-            this.btnaktar = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -454,7 +483,7 @@
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(733, 409);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Veritabanından Aktarım";
@@ -691,6 +720,8 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.btnaktar2);
+            this.tabPage2.Controls.Add(this.btnsil);
             this.tabPage2.Controls.Add(this.btnaktar);
             this.tabPage2.Controls.Add(this.label23);
             this.tabPage2.Controls.Add(this.textUrl);
@@ -717,17 +748,63 @@
             this.tabPage2.Controls.Add(this.label20);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(733, 409);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Klasörden Aktarım";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // btnaktar2
+            // 
+            this.btnaktar2.Location = new System.Drawing.Point(599, 101);
+            this.btnaktar2.Name = "btnaktar2";
+            this.btnaktar2.Size = new System.Drawing.Size(98, 23);
+            this.btnaktar2.TabIndex = 77;
+            this.btnaktar2.Text = "EArsiv Aktarim";
+            this.btnaktar2.UseVisualStyleBackColor = true;
+            this.btnaktar2.Click += new System.EventHandler(this.btnaktar2_Click);
+            // 
+            // btnsil
+            // 
+            this.btnsil.Location = new System.Drawing.Point(447, 170);
+            this.btnsil.Name = "btnsil";
+            this.btnsil.Size = new System.Drawing.Size(115, 23);
+            this.btnsil.TabIndex = 76;
+            this.btnsil.Text = "Fatura Sil";
+            this.btnsil.UseVisualStyleBackColor = true;
+            this.btnsil.Click += new System.EventHandler(this.btnsil_Click);
+            // 
+            // btnaktar
+            // 
+            this.btnaktar.Location = new System.Drawing.Point(447, 135);
+            this.btnaktar.Name = "btnaktar";
+            this.btnaktar.Size = new System.Drawing.Size(115, 23);
+            this.btnaktar.TabIndex = 75;
+            this.btnaktar.Text = "Netsis Fatura Aktar";
+            this.btnaktar.UseVisualStyleBackColor = true;
+            this.btnaktar.Click += new System.EventHandler(this.btnaktar_Click);
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Location = new System.Drawing.Point(71, 138);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(38, 13);
+            this.label23.TabIndex = 74;
+            this.label23.Text = "Api Url";
+            // 
+            // textUrl
+            // 
+            this.textUrl.Location = new System.Drawing.Point(115, 135);
+            this.textUrl.Name = "textUrl";
+            this.textUrl.Size = new System.Drawing.Size(325, 20);
+            this.textUrl.TabIndex = 73;
+            // 
             // checkFatura
             // 
             this.checkFatura.AutoSize = true;
             this.checkFatura.Location = new System.Drawing.Point(14, 170);
-            this.checkFatura.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.checkFatura.Margin = new System.Windows.Forms.Padding(2);
             this.checkFatura.Name = "checkFatura";
             this.checkFatura.Size = new System.Drawing.Size(202, 17);
             this.checkFatura.TabIndex = 72;
@@ -769,9 +846,9 @@
             // 
             this.btnMigrateByFolder.Location = new System.Drawing.Point(487, 102);
             this.btnMigrateByFolder.Name = "btnMigrateByFolder";
-            this.btnMigrateByFolder.Size = new System.Drawing.Size(75, 23);
+            this.btnMigrateByFolder.Size = new System.Drawing.Size(106, 23);
             this.btnMigrateByFolder.TabIndex = 69;
-            this.btnMigrateByFolder.Text = "Aktar";
+            this.btnMigrateByFolder.Text = "EFatura Zarf Aktar";
             this.btnMigrateByFolder.UseVisualStyleBackColor = true;
             this.btnMigrateByFolder.Click += new System.EventHandler(this.btnMigrateByFolder_Click);
             // 
@@ -912,31 +989,72 @@
             this.label20.TabIndex = 53;
             this.label20.Text = "Hedef Veritabanı Bilgileri";
             // 
-            // textUrl
+            // tabPage3
             // 
-            this.textUrl.Location = new System.Drawing.Point(115, 135);
-            this.textUrl.Name = "textUrl";
-            this.textUrl.Size = new System.Drawing.Size(325, 20);
-            this.textUrl.TabIndex = 73;
+            this.tabPage3.Controls.Add(this.label25);
+            this.tabPage3.Controls.Add(this.textCari);
+            this.tabPage3.Controls.Add(this.propertyGrid1);
+            this.tabPage3.Controls.Add(this.label24);
+            this.tabPage3.Controls.Add(this.textFatura);
+            this.tabPage3.Controls.Add(this.btnbul);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Size = new System.Drawing.Size(733, 409);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Fatura Bul";
+            this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // label23
+            // label25
             // 
-            this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(71, 138);
-            this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(38, 13);
-            this.label23.TabIndex = 74;
-            this.label23.Text = "Api Url";
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(61, 35);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(47, 13);
+            this.label25.TabIndex = 5;
+            this.label25.Text = "Cari Kod";
             // 
-            // btnaktar
+            // textCari
             // 
-            this.btnaktar.Location = new System.Drawing.Point(447, 135);
-            this.btnaktar.Name = "btnaktar";
-            this.btnaktar.Size = new System.Drawing.Size(115, 23);
-            this.btnaktar.TabIndex = 75;
-            this.btnaktar.Text = "Aktar";
-            this.btnaktar.UseVisualStyleBackColor = true;
-            this.btnaktar.Click += new System.EventHandler(this.btnaktar_Click);
+            this.textCari.Location = new System.Drawing.Point(144, 32);
+            this.textCari.Name = "textCari";
+            this.textCari.Size = new System.Drawing.Size(100, 20);
+            this.textCari.TabIndex = 4;
+            // 
+            // propertyGrid1
+            // 
+            this.propertyGrid1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.propertyGrid1.Location = new System.Drawing.Point(331, 9);
+            this.propertyGrid1.Name = "propertyGrid1";
+            this.propertyGrid1.Size = new System.Drawing.Size(399, 392);
+            this.propertyGrid1.TabIndex = 3;
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Location = new System.Drawing.Point(61, 9);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(54, 13);
+            this.label24.TabIndex = 2;
+            this.label24.Text = "Fatura No";
+            // 
+            // textFatura
+            // 
+            this.textFatura.Location = new System.Drawing.Point(144, 6);
+            this.textFatura.Name = "textFatura";
+            this.textFatura.Size = new System.Drawing.Size(100, 20);
+            this.textFatura.TabIndex = 1;
+            // 
+            // btnbul
+            // 
+            this.btnbul.Location = new System.Drawing.Point(250, 4);
+            this.btnbul.Name = "btnbul";
+            this.btnbul.Size = new System.Drawing.Size(75, 23);
+            this.btnbul.TabIndex = 0;
+            this.btnbul.Text = "Bul";
+            this.btnbul.UseVisualStyleBackColor = true;
+            this.btnbul.Click += new System.EventHandler(this.btnbul_Click);
             // 
             // MainForm
             // 
@@ -953,6 +1071,8 @@
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1096,7 +1216,7 @@
                                     }
                                     else
                                     {
-                                        ReadInvoiceXmlFile(zipEntry.Name, command, writer);
+                                        ReadInvoiceXmlFile(Path.Combine(directoryName, zipEntry.Name), command, writer);
                                     }
                                 }
                             }
@@ -1172,45 +1292,6 @@
         {
             try
             {
-                //using (var reader = new XmlTextReader(xmlfile))
-                //{
-                //    reader.WhitespaceHandling = WhitespaceHandling.None;
-                //    while (reader.Read())
-                //    {
-                //        switch (reader.NodeType)
-                //        {
-                //            case XmlNodeType.Element:
-                //                Trace.Write(string.Format("<{0}>", reader.Name));
-                //                break;
-                //            case XmlNodeType.Text:
-                //                Trace.Write(reader.Value);
-                //                break;
-                //            case XmlNodeType.CDATA:
-                //                Trace.Write(string.Format("<![CDATA[{0}]]>", reader.Value));
-                //                break;
-                //            case XmlNodeType.ProcessingInstruction:
-                //                Trace.Write(string.Format("<?{0} {1}?>", reader.Name, reader.Value));
-                //                break;
-                //            case XmlNodeType.Comment:
-                //                Trace.Write(string.Format("<!--{0}-->", reader.Value));
-                //                break;
-                //            case XmlNodeType.XmlDeclaration:
-                //                Trace.Write(string.Format("<?xml version='1.0'?>"));
-                //                break;
-                //            case XmlNodeType.Document:
-                //                break;
-                //            case XmlNodeType.DocumentType:
-                //                Trace.Write(string.Format("<!DOCTYPE {0} [{1}]", reader.Name, reader.Value));
-                //                break;
-                //            case XmlNodeType.EntityReference:
-                //                Trace.Write(reader.Name);
-                //                break;
-                //            case XmlNodeType.EndElement:
-                //                Trace.Write(string.Format("</{0}>", reader.Name));
-                //                break;
-                //        }
-                //    }
-                //}
 
                 XmlSerializer serializer = new XmlSerializer(typeof(UblTr.MainDoc.InvoiceType));
                 using (StreamReader streamreader = new StreamReader(xmlfile))
@@ -1218,6 +1299,7 @@
                     var invoice = (UblTr.MainDoc.InvoiceType)serializer.Deserialize(streamreader);
                     if (invoice != null)
                     {
+                        string tkn = invoice.AccountingCustomerParty.Party.AgentParty.PartyIdentification[0].ID.Value;
                         string cariKod = "";
                         command.CommandText = "select c.CARI_KOD,VERGI_NUMARASI,ce.TCKIMLIKNO from tblcasabit as c inner join TBLCASABITEK as ce on c.CARI_KOD=ce.CARI_KOD where VERGI_NUMARASI = @TKN or ce.TCKIMLIKNO = @TKN";
                         DbParameter parameter = command.CreateParameter();
@@ -1235,11 +1317,12 @@
                         }
                         command.Parameters.Clear();
 
-                        command.CommandText = string.Format("SELECT COUNT(*) FROM TBLFATUIRS WITH (NOLOCK) WHERE FTIRSIP = '1' AND CARI_KODU = '{0}' AND FATIRS_NO = '{1}'", cariKod, invoice.ID.Value);
+                        command.CommandText = string.Format("SELECT COUNT(*) FROM TBLFATUIRS WITH (NOLOCK) WHERE FTIRSIP = '1' AND CARI_KODU = '{0}' AND FATIRS_NO = '{1}'", cariKod, invoice.ID.Value.Replace("2022", "000"));
                         var checkFat = command.ExecuteScalar();
                         if (checkFat != null && Convert.ToInt32(checkFat) > 0)
                         {
                             logwriter.WriteLine($"{xmlfile} fatura var!");
+                            return;
                         }
 
                         Kernel kernel = new Kernel();
@@ -1247,6 +1330,8 @@
                         Fatura fatura = default(Fatura);
                         FatUst fatUst = default(FatUst);
                         FatKalem fatKalem = default(FatKalem);
+                        decimal kur = 0;
+
 
                         try
                         {
@@ -1262,65 +1347,151 @@
                             fatUst = fatura.Ust();
                             fatUst.FATIRS_NO = invoice.ID.Value.Replace("2022", "000"); //fatura.YeniNumara("A");
                             fatUst.GIB_FATIRS_NO = invoice.ID.Value;
-                            fatUst.CariKod = cariKod;
+                            fatUst.CariKod = cariKod;//T.111.057
                             fatUst.Tarih = invoice.IssueDate.Value;
                             fatUst.ENTEGRE_TRH = invoice.IssueDate.Value;
                             fatUst.FiiliTarih = invoice.IssueDate.Value;
                             fatUst.SIPARIS_TEST = invoice.IssueDate.Value;
                             fatUst.FIYATTARIHI = invoice.IssueDate.Value;
                             fatUst.ODEMETARIHI = invoice.IssueDate.Value;
+                            fatUst.DovBazTarihi = invoice.IssueDate.Value;
                             fatUst.ODEMEGUNU = 0;
                             fatUst.TIPI = TFaturaTipi.ft_Acik;
                             fatUst.Proje_Kodu = "G";
+                            fatUst.Aciklama = "H";
+                            fatUst.KOD1 = "I";
+                            //fatUst.EFatOzelKod = 1;
                             fatUst.KDV_DAHILMI = false;
-                            if (invoice.AllowanceCharge != null && invoice.AllowanceCharge.Length > 0)
-                            {
-                                fatUst.GEN_ISK1T = (double)invoice.AllowanceCharge[0].Amount.Value;
-                                fatUst.GEN_ISK1O = (double)invoice.AllowanceCharge[0].MultiplierFactorNumeric.Value * 100;
-                            }
-
+                            //if (invoice.AllowanceCharge != null && invoice.AllowanceCharge.Length > 0)
+                            //{
+                            //    fatUst.GEN_ISK1T = (double)invoice.AllowanceCharge[0].Amount.Value;
+                            //    fatUst.GEN_ISK1O = (double)invoice.AllowanceCharge[0].MultiplierFactorNumeric.Value * 100;
+                            //}
 
                             //fatUst.BRUTTUTAR = 2;
                             //fatUst.KDV = 0;
 
+                            /*
+                             AB.101.011
+                             AB.101.012
+                             AB.101.013
+                             AB.101.014
+                             AB.101.015
+                             AB.101.016
+                             */
+
                             for (int i = 0; i < invoice.InvoiceLine.Length; i++)
                             {
+                                int olcuBr = 0;
+                                decimal pay1 = 1, pay2 = 1;
+                                decimal dovizKur = 0M;
+                                //command.CommandText = string.Format("select olcu_br1,OLCU_BR2,OLCU_BR3 from tblstsabit with (nolock) where STOK_KODU = N'{0}'", invoice.InvoiceLine[i].Item.SellersItemIdentification.ID.Value);
+                                command.CommandText = string.Format(@"SELECT B1.UNITCODE B1,B2.UNITCODE B2,B3.UNITCODE B3,S.PAYDA_1,S.PAYDA2 FROM TBLSTSABIT AS S WITH (NOLOCK) LEFT OUTER JOIN 
+TBLEFATOLCUBIRIM AS B1 WITH (NOLOCK) ON B1.NETSISUNITCODE = S.OLCU_BR1 LEFT OUTER JOIN 
+TBLEFATOLCUBIRIM AS B2 WITH (NOLOCK) ON B2.NETSISUNITCODE = S.OLCU_BR2 LEFT OUTER JOIN 
+TBLEFATOLCUBIRIM AS B3 WITH (NOLOCK) ON B3.NETSISUNITCODE = S.OLCU_BR3 
+WHERE S.STOK_KODU = N'{0}'  ", invoice.InvoiceLine[i].Item.SellersItemIdentification.ID.Value);
+                                using (var dr = command.ExecuteReader())
+                                {
+                                    if (dr != null && dr.Read())
+                                    {
+                                        if (!dr.IsDBNull(0) && dr.GetValue(0).ToString() == invoice.InvoiceLine[i].InvoicedQuantity.unitCode) olcuBr = 1;
+                                        else if (!dr.IsDBNull(1) && dr.GetValue(1).ToString() == invoice.InvoiceLine[i].InvoicedQuantity.unitCode) olcuBr = 2;
+                                        else if (!dr.IsDBNull(2) && dr.GetValue(2).ToString() == invoice.InvoiceLine[i].InvoicedQuantity.unitCode) olcuBr = 3;
+                                        if (!dr.IsDBNull(3)) pay1 = Convert.ToDecimal(dr.GetDecimal(3));
+                                        if (!dr.IsDBNull(4)) pay2 = Convert.ToDecimal(dr.GetDecimal(4));
+                                    }
+                                }
+
                                 fatKalem = fatura.kalemYeni(invoice.InvoiceLine[i].Item.SellersItemIdentification.ID.Value);
                                 fatKalem.DEPO_KODU = 1;
-                                fatKalem.STra_GCMIK = (double)invoice.InvoiceLine[i].InvoicedQuantity.Value;
-                                fatKalem.STra_NF = (double)invoice.InvoiceLine[i].Price.PriceAmount.Value;
-                                fatKalem.STra_BF = (double)invoice.InvoiceLine[i].Price.PriceAmount.Value;
-                                fatKalem.STra_SIPNUM = invoice.OrderReference.ID.Value;
+                                if (invoice.Note != null && invoice.Note.Length > 0 && !string.IsNullOrWhiteSpace(invoice.Note[0].Value))
+                                {
+                                    if (invoice.Note[0].Value.ToLower().IndexOf("kur") != -1)
+                                    {
+                                        dovizKur = Convert.ToDecimal(invoice.Note[0].Value.Replace("Kur", "").Replace(":", ""));
+                                    }
+                                }
+
+                                switch (olcuBr)
+                                {
+                                    case 2:
+                                        fatKalem.STra_GCMIK = Convert.ToDouble(invoice.InvoiceLine[i].InvoicedQuantity.Value * pay1);
+                                        if (invoice.InvoiceLine[i].Item.ModelName != null)
+                                            fatKalem.STra_DOVFIAT = Convert.ToDouble(Convert.ToDecimal(invoice.InvoiceLine[i].Item.ModelName.Value) / pay1);
+                                        fatKalem.STra_BF = Convert.ToDouble(invoice.InvoiceLine[i].Price.PriceAmount.Value / pay1);
+                                        //fatKalem.Fiat_birimi = 2;
+                                        break;
+                                    case 3:
+                                        fatKalem.STra_GCMIK = Convert.ToDouble(invoice.InvoiceLine[i].InvoicedQuantity.Value * pay2);
+                                        if (invoice.InvoiceLine[i].Item.ModelName != null)
+                                            fatKalem.STra_DOVFIAT = Convert.ToDouble(Convert.ToDecimal(invoice.InvoiceLine[i].Item.ModelName.Value) / pay2);
+                                        fatKalem.STra_BF = Convert.ToDouble(invoice.InvoiceLine[i].Price.PriceAmount.Value / pay2);
+                                        //fatKalem.Fiat_birimi = 3;
+                                        break;
+                                    default:
+                                        fatKalem.STra_GCMIK = (double)invoice.InvoiceLine[i].InvoicedQuantity.Value;
+                                        if (invoice.InvoiceLine[i].Item.ModelName != null)
+                                            fatKalem.STra_DOVFIAT = Convert.ToDouble(Convert.ToDecimal(invoice.InvoiceLine[i].Item.ModelName.Value));
+                                        fatKalem.STra_BF = (double)invoice.InvoiceLine[i].Price.PriceAmount.Value;
+                                        break;
+                                }
+
+                                if (invoice.InvoiceLine[i].Item.ModelName != null)
+                                    logwriter.WriteLine($"{invoice.ID.Value} {invoice.InvoiceLine[i].Item.ModelName.Value} 1X {Convert.ToDouble(invoice.InvoiceLine[i].Item.ModelName.Value)} doviz {dovizKur}");
+
+                                fatKalem.Ekalan = invoice.InvoiceLine[i].InvoicedQuantity.Value.ToString();
+                                //fatKalem.STra_NF = (double)invoice.InvoiceLine[i].Price.PriceAmount.Value;
+                                if (invoice.OrderReference != null)
+                                    fatKalem.STra_SIPNUM = invoice.OrderReference.ID.Value;
                                 //fatKalem.Irsaliyetar = invoice.OrderReference.IssueDate.Value;
-                                if (invoice.InvoiceLine[0].AllowanceCharge != null && invoice.InvoiceLine[0].AllowanceCharge.Length > 0)
-                                    fatKalem.STra_SatIsk = (double)invoice.InvoiceLine[0].AllowanceCharge[0].MultiplierFactorNumeric.Value * 100;
+                                if (invoice.InvoiceLine[i].AllowanceCharge != null && invoice.InvoiceLine[i].AllowanceCharge.Length > 0 &&
+                                    invoice.InvoiceLine[i].AllowanceCharge[0].MultiplierFactorNumeric.Value > 0)
+                                {
+
+                                    fatKalem.STra_SatIsk = (double)invoice.InvoiceLine[i].AllowanceCharge[0].MultiplierFactorNumeric.Value * 100;
+                                }
+                                else fatKalem.STra_SatIsk = 0;
+                                fatKalem.ProjeKodu = "G";
+
+                                if (invoice.InvoiceLine[i].Item != null && invoice.InvoiceLine[i].Item.BrandName != null)
+                                {
+                                    if (invoice.InvoiceLine[i].Item.BrandName.Value == "USD")
+                                        fatKalem.STra_DOVTIP = 1;
+                                    else if (invoice.InvoiceLine[i].Item.BrandName.Value == "EURO")
+                                        fatKalem.STra_DOVTIP = 2;
+                                }
+
+
+                                fatKalem.Olcubr = olcuBr;
+                                //fatKalem.Fiat_birimi = olcuBr;
 
 
                                 //fatKalem.Stra_IrsKont = invoice.InvoiceLine[i].OrderLineReference[0].LineI;
                                 if (invoice.InvoiceLine[i].TaxTotal.TaxSubtotal != null && invoice.InvoiceLine[i].TaxTotal.TaxSubtotal.Length > 0)
                                     fatKalem.STra_KDV = (double)invoice.InvoiceLine[i].TaxTotal.TaxSubtotal[0].Percent.Value;
                                 //fatKalem.SatisKDVOran = invoice.TaxTotal.TaxSubtotal.Percent;
-                                if (invoice.TaxTotal != null && invoice.TaxTotal.Length > 0 && invoice.TaxTotal[0].TaxSubtotal != null && 
-                                    invoice.TaxTotal[0].TaxSubtotal.Length > 0 && invoice.TaxTotal[0].TaxSubtotal[0].TaxableAmount.currencyID == "USD")
-                                {
-                                    fatKalem.STra_DOVTIP = 1;
-                                    fatKalem.STra_DOVFIAT = (double)invoice.TaxTotal[0].TaxSubtotal[0].TaxableAmount.Value;
-                                    //fatKalem.STra_NF = result.
-                                    //fatKalem.STra_BF = (double)result.InvoiceLine[i].AllowanceCharge.Amount.Value;
-                                }
-                                else
-                                {
+                                //if (invoice.TaxTotal != null && invoice.TaxTotal.Length > 0 && invoice.TaxTotal[0].TaxSubtotal != null &&
+                                //    invoice.TaxTotal[0].TaxSubtotal.Length > 0 && invoice.TaxTotal[0].TaxSubtotal[0].TaxableAmount.currencyID == "USD")
+                                //{
+                                //    fatKalem.STra_DOVTIP = 1;
+                                //    fatKalem.STra_DOVFIAT = (double)invoice.TaxTotal[0].TaxSubtotal[0].TaxableAmount.Value;
+                                //    //fatKalem.STra_NF = result.
+                                //    //fatKalem.STra_BF = (double)result.InvoiceLine[i].AllowanceCharge.Amount.Value;
+                                //}
+                                //else
+                                //{
 
-                                }
+                                //}
                             }
 
                             fatura.kayitYeni();
 
-                            logwriter.WriteLine($"{xmlfile} kayıt başarılı");
+                            logwriter.WriteLine($"{invoice.ID.Value} {xmlfile} kayıt başarılı");
                         }
                         catch (Exception exc1)
                         {
-                            logwriter.WriteLine($"{xmlfile} hata {exc1.Message} detay {exc1.StackTrace}");
+                            logwriter.WriteLine($"{xmlfile} TKN:{tkn} hata {exc1.Message} detay {exc1.StackTrace}");
                             //MessageBox.Show(string.Format("Xml dosyasi acilirken hata:{0}{1}", Environment.NewLine, exc1), "Hata", MessageBoxButtons.OK, MessageBoxIcon.Hand);
                         }
                         finally
@@ -1376,6 +1547,7 @@
                                                           "netopenx",
                                                           "1234",
                                                           0);
+
                             fatura = kernel.yeniFatura(sirket, TFaturaTip.ftSFat);
                             fatUst = fatura.Ust();
                             fatUst.FATIRS_NO = result.ID.Value.Replace("2022", "000"); //fatura.YeniNumara("A");
@@ -1537,7 +1709,7 @@
                 NetsisUser = "netopenx", //netsis kullanıcı adı bilgisi
                 NetsisPassword = "1234", //netsis şifre bilgisi
                 DbType = JNVTTipi.vtMSSQL, //veritabanı tipi
-                DbName = "MAHIR2021", //şirket bilgisi
+                DbName = this.txtFolderSchema.Text, //şirket bilgisi
                 DbPassword = "", //veritabanı şifre bilgisi
                 DbUser = "TEMELSET" //veritabanı kullanıcı adı bilgisi
             };
@@ -1585,6 +1757,481 @@
 
             WritePrivateProfile("checkFatura", checkFatura.Checked ? "1" : "0");
         }
+
+        private void btnsil_Click(object sender, EventArgs e)
+        {
+            SaveProfile();
+
+            Kernel kernel = new Kernel();
+            Sirket sirket = default(Sirket);
+            Fatura fatura = default(Fatura);
+            FatUst fatUst = default(FatUst);
+            FatKalem fatKalem = default(FatKalem);
+            StreamWriter writer = null;
+
+            try
+            {
+                writer = new System.IO.StreamWriter($"{txtSelectedFolder.Text}\\fatsil.log", false, System.Text.Encoding.GetEncoding("windows-1254"));
+                writer.AutoFlush = true;
+
+                sirket = kernel.yeniSirket(TVTTipi.vtMSSQL,
+                                                         this.txtFolderSchema.Text,
+                                                         "TEMELSET",
+                                                         "",
+                                                         "netopenx",
+                                                         "1234",
+                                                         0);
+
+                DbConnection connection;
+                DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+                builder["user id"] = this.txtFolderUser.Text;
+                builder["password"] = this.txtFolderPass.Text;
+                builder["Data Source"] = this.txtFolderServer.Text;
+                if (this.cmbSourceDbType.SelectedIndex == 0)
+                {
+                    builder["initial catalog"] = this.txtFolderSchema.Text;
+                }
+                BaseRepository.Configure(builder.ConnectionString, (this.cmbSourceDbType.SelectedIndex == 0) ? string.Empty : this.txtSourceSchema.Text, (this.cmbSourceDbType.SelectedIndex == 0) ? ProviderType.SystemDataSqlClient : ProviderType.SystemDataOracleClient);
+                connection = BaseRepository.CreateConnection();
+                connection.Open();
+                DbCommand command = connection.CreateCommand();
+                command.CommandText = "SELECT FATIRS_NO,FTIRSIP,CARI_KODU FROM TBLFATUIRS WHERE KAYITYAPANKUL='NETOPENX' AND FTIRSIP = 1";
+                using (DbDataReader dataReader = command.ExecuteReader())
+                {
+                    string fatirsNo = string.Empty;
+                    string cariKod = string.Empty;
+                    while (dataReader.Read())
+                    {
+                        if (!dataReader.IsDBNull(0))
+                            fatirsNo = dataReader.GetValue(0).ToString();
+
+                        if (!dataReader.IsDBNull(2))
+                            cariKod = dataReader.GetValue(2).ToString();
+
+                        fatura = kernel.yeniFatura(sirket, TFaturaTip.ftSFat);
+                        fatura.OkuUst(fatirsNo, cariKod);
+                        fatura.OkuKalem();
+                        fatura.kayitSil();
+
+                        writer.WriteLine($"silindi {fatirsNo}\t{cariKod}");
+
+                        Thread.Sleep(100);
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                writer.WriteLine($"hata {exc.Message}\t{exc.StackTrace}");
+            }
+            finally
+            {
+                Marshal.ReleaseComObject(fatKalem);
+                Marshal.ReleaseComObject(fatUst);
+                Marshal.ReleaseComObject(fatura);
+                Marshal.ReleaseComObject(sirket);
+                kernel.FreeNetsisLibrary();
+                Marshal.ReleaseComObject(kernel);
+                if (writer != null)
+                {
+                    writer.Close();
+                    writer.Dispose();
+                }
+                writer = null;
+            }
+        }
+
+        private void btnbul_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var _oAuth2 = new oAuth2(textUrl.Text);
+                _oAuth2.Login(GetLogin());
+                ItemSlipsManager _manager = new ItemSlipsManager(_oAuth2);
+                //var restResult = _manager.GetInternalByParam(new NetOpenX.Rest.Client.Model.Custom.ItemSlipsParam()
+                //{
+                //    DocumentType = JTFaturaTip.ftSFat,
+                //    DocumentNumber = textFatura.Text,
+                //    CustomerCode = textCari.Text
+                //});
+                var restResult = _manager.GetInternalById($"ftSFat;{textFatura.Text};{textCari.Text}");
+                if (restResult != null)
+                {
+                    propertyGrid1.SelectedObject = restResult.Data;
+                    MessageBox.Show($"{restResult.IsSuccessful},{restResult.Message},{restResult.ErrorCode},{restResult.ErrorDesc}");
+                }
+                else
+                    MessageBox.Show($"null");
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show($"{exc.Message}, detay:{exc.StackTrace}");
+            }
+
+            //Kernel kernel = new Kernel();
+            //Sirket sirket = default(Sirket);
+            //Fatura fatura = default(Fatura);
+
+            //try
+            //{
+
+            //    sirket = kernel.yeniSirket(TVTTipi.vtMSSQL,
+            //                                             this.txtFolderSchema.Text,
+            //                                             "TEMELSET",
+            //                                             "",
+            //                                             "netopenx",
+            //                                             "1234",
+            //                                             0);
+
+
+
+            //    fatura = kernel.yeniFatura(sirket, TFaturaTip.ftSFat);
+            //    fatura.OkuUst(textFatura.Text);
+            //    fatura.OkuKalem();
+
+            //    if (fatura != null) propertyGrid1.SelectedObject = fatura;
+
+
+            //}
+            //catch (Exception exc)
+            //{
+            //    MessageBox.Show(exc.Message);
+            //}
+            //finally
+            //{
+            //    Marshal.ReleaseComObject(fatura);
+            //    Marshal.ReleaseComObject(sirket);
+            //    kernel.FreeNetsisLibrary();
+            //    Marshal.ReleaseComObject(kernel);
+
+            //}
+        }
+
+        private void btnaktar2_Click(object sender, EventArgs e)
+        {
+            System.IO.StreamWriter writer = null;
+            try
+            {
+                SaveProfile();
+
+                DirectoryInfo directoryInfo = new DirectoryInfo(txtSelectedFolder.Text); //new DirectoryInfo(txtSelectedFolder.Text);
+                if (directoryInfo.Exists)
+                {
+                    DbConnection connection;
+                    DbConnectionStringBuilder builder = new DbConnectionStringBuilder();
+                    builder["user id"] = this.txtFolderUser.Text;
+                    builder["password"] = this.txtFolderPass.Text;
+                    builder["Data Source"] = this.txtFolderServer.Text;
+                    if (this.cmbSourceDbType.SelectedIndex == 0)
+                    {
+                        builder["initial catalog"] = this.txtFolderSchema.Text;
+                    }
+                    BaseRepository.Configure(builder.ConnectionString, (this.cmbSourceDbType.SelectedIndex == 0) ? string.Empty : this.txtSourceSchema.Text, (this.cmbSourceDbType.SelectedIndex == 0) ? ProviderType.SystemDataSqlClient : ProviderType.SystemDataOracleClient);
+                    connection = BaseRepository.CreateConnection();
+                    connection.Open();
+                    DbCommand command = connection.CreateCommand();
+                    var files = directoryInfo.GetFiles("*.zip");
+                    if (files != null && files.Length > 0)
+                    {
+                        writer = new System.IO.StreamWriter($"{txtSelectedFolder.Text}\\aktarim.log", false, System.Text.Encoding.GetEncoding("windows-1254"));
+                        writer.AutoFlush = true;
+                        foreach (var f in files)
+                        {
+                            //ICSharpCode.SharpZipLib.Zip.FastZip shpZip = new ICSharpCode.SharpZipLib.Zip.FastZip();
+                            //shpZip.ExtractZip(f.FullName, Application.StartupPath, ".*");
+
+                            FastZip fz = new FastZip();
+
+                            using (ZipFile zipArchive = new ZipFile(f.FullName))
+                            {
+                                byte[] buffer = new byte[4096];
+                                foreach (ZipEntry zipEntry in zipArchive)
+                                {
+                                    String fullZipToPath = Path.Combine(txtSelectedFolder.Text, zipEntry.Name);
+
+                                    string directoryName = Path.GetDirectoryName(fullZipToPath);
+
+                                    if (!string.IsNullOrWhiteSpace(directoryName) && !Directory.Exists(directoryName))
+                                        Directory.CreateDirectory(directoryName);
+
+                                    Stream zipStream = zipArchive.GetInputStream(zipEntry);
+
+                                    using (FileStream streamWriter = File.Create(fullZipToPath))
+                                    {
+                                        StreamUtils.Copy(zipStream, streamWriter, buffer);
+                                    }
+
+                                    if (zipEntry.Name.EndsWith(".zip"))
+                                    {
+                                        using (ZipFile zipArch = new ZipFile($"{txtSelectedFolder.Text}\\{zipEntry.Name}"))
+                                        {
+                                            foreach (ZipEntry zipEnt in zipArch)
+                                            {
+                                                String fullZipath = Path.Combine(directoryName, zipEnt.Name);
+
+                                                string dirName = Path.GetDirectoryName(fullZipath);
+
+                                                if (dirName.Length > 0)
+                                                    Directory.CreateDirectory(dirName);
+
+                                                Stream zipSt = zipArch.GetInputStream(zipEnt);
+                                                using (FileStream streamWriter = File.Create(fullZipath))
+                                                {
+                                                    StreamUtils.Copy(zipSt, streamWriter, buffer);
+                                                }
+                                                ReadInvoiceXmlFile2($"{txtSelectedFolder.Text}\\{zipEntry.Name}", fullZipath, command, writer);
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        ReadInvoiceXmlFile2(f.FullName, zipEntry.Name, command, writer);
+                                    }
+                                }
+                            }
+
+
+                        }
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                writer.WriteLine($"Aktarim genel hata:{exc.Message} detay:{exc.StackTrace}");
+                MessageBox.Show(string.Format("Hedef veritabanı bağlantısında hata oluştu:{0}{1}", Environment.NewLine, exc), "Hata", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+            }
+            finally
+            {
+                if (writer != null) writer.Close();
+            }
+        }
+
+        private void ReadInvoiceXmlFile2(string zipfile, string xmlfile, DbCommand command, StreamWriter logwriter)
+        {
+            try
+            {
+                byte[] buffer = File.ReadAllBytes(zipfile);
+
+                XmlSerializer serializer = new XmlSerializer(typeof(UblTr.MainDoc.InvoiceType));
+                using (StreamReader streamreader = new StreamReader(xmlfile))
+                {
+                    var invoice = (UblTr.MainDoc.InvoiceType)serializer.Deserialize(streamreader);
+                    if (invoice != null)
+                    {
+                        try
+                        {
+                            string tkn = string.Empty;
+                            if(invoice.AccountingCustomerParty.Party.AgentParty != null)
+                                tkn = invoice.AccountingCustomerParty.Party.AgentParty.PartyIdentification[0].ID.Value;
+                            else if(invoice.AccountingCustomerParty.Party.PartyIdentification != null)
+                                tkn = invoice.AccountingCustomerParty.Party.PartyIdentification[0].ID.Value;
+                            
+                            //string tkn = invoice.AccountingCustomerParty.Party.AgentParty.PartyIdentification[0].ID.Value;
+                            string cariKod = "";
+                            command.CommandText = "select c.CARI_KOD,VERGI_NUMARASI,ce.TCKIMLIKNO from tblcasabit as c inner join TBLCASABITEK as ce on c.CARI_KOD=ce.CARI_KOD where VERGI_NUMARASI = @TKN or ce.TCKIMLIKNO = @TKN";
+                            DbParameter parameter = command.CreateParameter();
+                            parameter.ParameterName = "TKN";
+                            parameter.Value = invoice.AccountingCustomerParty.Party.AgentParty.PartyIdentification[0].ID.Value; //invoice.AccountingSupplierParty.Party.PartyIdentification[0].ID.Value;
+                            parameter.DbType = DbType.String;
+                            command.Parameters.Add(parameter);
+                            BaseRepository.FixCommand(command, false);
+                            using (DbDataReader reader = command.ExecuteReader())
+                            {
+                                if (reader != null && reader.Read())
+                                {
+                                    cariKod = reader.GetValue(0).ToString();
+                                }
+                            }
+                            command.Parameters.Clear();
+
+                            if (invoice.ProfileID.Value == "TICARIFATURA")
+                            {
+
+                            }
+                            else if (invoice.ProfileID.Value == "EARSIVFATURA")
+                            {
+                                command.CommandText = @"INSERT INTO TBLEARSIV (SUBE_KODU, GIB_FATIRS_NO, FTIRSIP, TIP, FATIRS_NO, CARI_KODU, TARIH, XMLBYTES, DURUM, KAYITYAPANKUL, KAYITTARIHI, UUID, 
+ RESPONSECODE, RESPONSEDESC, EARSIVID,  YEDEK2, YEDEK6, YEDEK7, YEDEK9, YEDEK11, YEDEK12) VALUES (@SUBE_KODU, @GIB_FATIRS_NO, @FTIRSIP, @TIP, @FATIRS_NO, @CARI_KODU, @TARIH, @XMLBYTES, @DURUM, @KAYITYAPANKUL, @KAYITTARIHI, @UUID, 
+ @RESPONSECODE, @RESPONSEDESC, @EARSIVID,  @YEDEK2, @YEDEK6, @YEDEK7, @YEDEK9, @YEDEK11, @YEDEK12)";
+
+
+                                var pSUBE_KODU = command.CreateParameter();
+                                pSUBE_KODU.ParameterName = "SUBE_KODU";
+                                pSUBE_KODU.Value = 0;
+                                command.Parameters.Add(pSUBE_KODU);
+
+                                var pGIB_FATIRS_NO = command.CreateParameter();
+                                pGIB_FATIRS_NO.ParameterName = "GIB_FATIRS_NO";
+                                pGIB_FATIRS_NO.Value = invoice.ID.Value;
+                                command.Parameters.Add(pGIB_FATIRS_NO);
+
+                                var pFTIRSIP = command.CreateParameter();
+                                pFTIRSIP.ParameterName = "FTIRSIP";
+                                pFTIRSIP.Value = 1;
+                                command.Parameters.Add(pFTIRSIP);
+
+                                var pTIP = command.CreateParameter();
+                                pTIP.ParameterName = "TIP";
+                                pTIP.Value = 0;
+                                command.Parameters.Add(pTIP);
+
+                                var pFATIRS_NO = command.CreateParameter();
+                                pFATIRS_NO.ParameterName = "FATIRS_NO";
+                                pFATIRS_NO.Value = invoice.ID.Value.Replace("2022", "000");
+                                command.Parameters.Add(pFATIRS_NO);
+
+                                var pCARI_KODU = command.CreateParameter();
+                                pCARI_KODU.ParameterName = "CARI_KODU";
+                                pCARI_KODU.Value = cariKod;
+                                command.Parameters.Add(pCARI_KODU);
+
+                                var pTARIH = command.CreateParameter();
+                                pTARIH.ParameterName = "TARIH";
+                                pTARIH.Value = invoice.IssueDate.Value;
+                                command.Parameters.Add(pTARIH);
+
+                                var pXMLBYTES = command.CreateParameter();
+                                pXMLBYTES.ParameterName = "XMLBYTES";
+                                pXMLBYTES.Value = buffer;
+                                command.Parameters.Add(pXMLBYTES);
+
+                                var pDURUM = command.CreateParameter();
+                                pDURUM.ParameterName = "DURUM";
+                                pDURUM.Value = 2;
+                                command.Parameters.Add(pDURUM);
+
+                                var pKAYITYAPANKUL = command.CreateParameter();
+                                pKAYITYAPANKUL.ParameterName = "KAYITYAPANKUL";
+                                pKAYITYAPANKUL.Value = "NETOPENX";
+                                command.Parameters.Add(pKAYITYAPANKUL);
+
+                                var pKAYITTARIHI = command.CreateParameter();
+                                pKAYITTARIHI.ParameterName = "KAYITTARIHI";
+                                pKAYITTARIHI.Value = DateTime.Now;
+                                command.Parameters.Add(pKAYITTARIHI);
+
+                                var pUUID = command.CreateParameter();
+                                pUUID.ParameterName = "UUID";
+                                pUUID.Value = invoice.UUID.Value;
+                                command.Parameters.Add(pUUID);
+
+                                var pRESPONSECODE = command.CreateParameter();
+                                pRESPONSECODE.ParameterName = "RESPONSECODE";
+                                pRESPONSECODE.Value = "30";
+                                command.Parameters.Add(pRESPONSECODE);
+
+                                var pRESPONSEDESC = command.CreateParameter();
+                                pRESPONSEDESC.ParameterName = "RESPONSEDESC";
+                                pRESPONSEDESC.Value = "İmzalandı";
+                                command.Parameters.Add(pRESPONSEDESC);
+
+                                var pEARSIVID = command.CreateParameter();
+                                pEARSIVID.ParameterName = "EARSIVID";
+                                pEARSIVID.Value = DBNull.Value;//invoice.UUID.schemeID;
+                                command.Parameters.Add(pEARSIVID);
+
+                                var pYEDEK2 = command.CreateParameter();
+                                pYEDEK2.ParameterName = "YEDEK2";
+                                pYEDEK2.Value = "E";
+                                command.Parameters.Add(pYEDEK2);
+
+                                var pYEDEK6 = command.CreateParameter();
+                                pYEDEK6.ParameterName = "YEDEK6";
+                                pYEDEK6.Value = DBNull.Value;
+                                command.Parameters.Add(pYEDEK6);
+
+                                var pYEDEK7 = command.CreateParameter();
+                                pYEDEK7.ParameterName = "YEDEK7";
+                                pYEDEK7.Value = DateTime.Now;
+                                command.Parameters.Add(pYEDEK7);
+
+                                var pYEDEK9 = command.CreateParameter();
+                                pYEDEK9.ParameterName = "YEDEK9";
+                                pYEDEK9.Value = xmlfile;
+                                command.Parameters.Add(pYEDEK9);
+
+                                var pYEDEK11 = command.CreateParameter();
+                                pYEDEK11.ParameterName = "YEDEK11";
+                                pYEDEK11.Value = cariKod;
+                                command.Parameters.Add(pYEDEK11);
+
+                                var pYEDEK12 = command.CreateParameter();
+                                pYEDEK12.ParameterName = "YEDEK12";
+                                if (invoice.AccountingCustomerParty != null && invoice.AccountingCustomerParty.Party != null && invoice.AccountingCustomerParty.Party.Contact != null &&
+                                    invoice.AccountingCustomerParty.Party.Contact.ElectronicMail != null)
+                                    pYEDEK12.Value = invoice.AccountingCustomerParty.Party.Contact.ElectronicMail.Value;
+                                else
+                                    pYEDEK12.Value = DBNull.Value;
+                                command.Parameters.Add(pYEDEK12);
+
+                                command.ExecuteNonQuery();
+
+                                logwriter.WriteLine($"{invoice.ID.Value} {xmlfile} kayıt başarılı");
+
+                            }
+
+                        }
+                        catch (Exception exc1)
+                        {
+                            logwriter.WriteLine($"{xmlfile} hata {exc1.Message} detay {exc1.StackTrace}");
+                            //MessageBox.Show(string.Format("Xml dosyasi acilirken hata:{0}{1}", Environment.NewLine, exc1), "Hata", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                        }
+                        finally
+                        {
+
+                        }
+                    }
+                }
+
+
+            }
+            catch (Exception exc)
+            {
+                logwriter.WriteLine($"{xmlfile} hata {exc.Message} detay {exc.StackTrace}");
+                //MessageBox.Show(string.Format("Xml dosyasi acilirken hata:{0}{1}", Environment.NewLine, exc), "Hata", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+            }
+            finally
+            {
+                try
+                {
+                    File.Delete(xmlfile);
+                }
+                catch
+                {
+                }
+            }
+        }
+
+
+        private void CheckDirForZip(string filename)
+        {
+            try
+            {
+                bool deleteFile = false;
+                using (Ionic.Zip.ZipFile xzip = new Ionic.Zip.ZipFile(filename))
+                {
+                    xzip.ExtractExistingFile = Ionic.Zip.ExtractExistingFileAction.OverwriteSilently;
+                    xzip.FlattenFoldersOnExtract = true;
+                    xzip.ExtractAll(txtSelectedFolder.Text);
+                    foreach (var z in xzip)
+                    {
+                        if (z.FileName.EndsWith(".zip"))
+                        {
+                            deleteFile = true;
+                            break;
+                        }
+                    }
+                    xzip.Dispose();
+                }
+                Thread.Sleep(100);
+                if (deleteFile) File.Delete(filename);
+            }
+            catch (Exception exc)
+            {
+                File.WriteAllText(Path.Combine(txtSelectedFolder.Text, "err", Guid.NewGuid().ToString(), ".log"), exc.Message);
+            }
+        }
+
+
     }
 }
 

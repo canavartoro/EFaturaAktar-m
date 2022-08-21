@@ -1,0 +1,28 @@
+﻿
+
+iskonto
+invoice.InvoiceLine[0].AllowanceCharge[0].MultiplierFactorNumeric.Value
+
+tutar
+invoice.InvoiceLine[0].Price.PriceAmount.Value * invoice.InvoiceLine[0].InvoicedQuantity.Value
+
+
+net tutar
+invoice.InvoiceLine[0].TaxTotal.TaxSubtotal[0].TaxableAmount.Value
+invoice.InvoiceLine[0].TaxTotal.TaxSubtotal[0].TaxableAmount.currencyID
+
+kdv oran
+invoice.InvoiceLine[0].TaxTotal.TaxSubtotal[0].Percent.Value
+
+kdv tutar
+invoice.InvoiceLine[0].TaxTotal.TaxSubtotal[0].TaxAmount.Value
+invoice.InvoiceLine[0].TaxTotal.TaxSubtotal[0].TaxAmount.currencyID
+
+kur  "Kur : 14,202"
+invoice.Note[0].Value
+
+doviz fiyat
+invoice.InvoiceLine[0].Item.ModelName.Value
+
+doviz
+invoice.InvoiceLine[0].Item.BrandName.Value
